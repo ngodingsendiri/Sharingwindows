@@ -5,6 +5,9 @@ color 0A
 set "LOGFILE=%~dp0sharing-setup.log"
 set "BACKUPDIR=%~dp0registry-backup"
 set "ERRORCOUNT=0"
+set "NOREBOOT=0"
+
+if /i "%1"=="--no-reboot" set "NOREBOOT=1"
 
 echo.
 echo  ====================================================
@@ -138,13 +141,18 @@ echo.
 echo  Installation complete.
 echo  Log saved to: %LOGFILE%
 echo.
-echo  The system will reboot in 10 seconds.
-echo  Press Ctrl+C to cancel the reboot.
+
+if %NOREBOOT% equ 1 (
+    echo  Reboot skipped. Please reboot manually when ready.
+) else (
+    echo  The system will reboot in 10 seconds.
+    echo  Press Ctrl+C to cancel the reboot.
+    echo.
+    timeout /t 10
+    shutdown /r /t 0 /f
+)
 echo.
-
-timeout /t 10
-
-shutdown /r /t 0 /f
+pause
 exit /b
 
 REM ==========================================

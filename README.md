@@ -22,6 +22,37 @@ Automatically configure Windows file and printer sharing across LAN networks. Wo
 | `verify.bat` | Post-reboot verification tool |
 | `restore.bat` | Restore all settings to Windows defaults |
 
+## How It Works
+
+```
+install.bat
+    │
+    ├── Backup registry (auto-saved to registry-backup/)
+    ├── Set network profile → Private
+    ├── Enable firewall rules (Network Discovery + File Sharing)
+    ├── Start & auto-enable 6 required services
+    ├── Enable SMBv1 (skip if already enabled)
+    ├── Configure registry for guest/anonymous access
+    └── Reboot in 10 seconds (Ctrl+C to cancel)
+
+verify.bat (after reboot)
+    │
+    ├── Check network profile status
+    ├── Verify firewall rules
+    ├── Check all services running
+    ├── Confirm SMBv1 state
+    ├── Verify registry settings
+    ├── List shared folders
+    └── Show access test instructions
+
+restore.bat (if something goes wrong)
+    │
+    ├── Import registry backups
+    ├── Reset network profile → Automatic
+    ├── Disable sharing firewall rules
+    └── Reset services to manual
+```
+
 ## Quick Start
 
 1. **Download** - Clone or download this repository
@@ -30,12 +61,20 @@ Automatically configure Windows file and printer sharing across LAN networks. Wo
 4. **Verify** - After reboot, run `verify.bat` to confirm settings
 
 ```
-git clone https://github.com/YOUR_USERNAME/Sharingwindows.git
+git clone https://github.com/ngodingsendiri/Sharingwindows.git
 cd Sharingwindows
 install.bat
 ```
 
-> Replace `YOUR_USERNAME` with your actual GitHub username.
+### Command Line Options
+
+```bash
+# Normal install (reboots after 10 seconds)
+install.bat
+
+# Install without reboot (manual reboot required)
+install.bat --no-reboot
+```
 
 ## Requirements
 

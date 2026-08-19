@@ -2,6 +2,8 @@
 title Windows LAN Sharing Setup - Restore Defaults
 color 0C
 
+set "LOGFILE=%~dp0restore.log"
+
 echo.
 echo  ====================================================
 echo   Windows LAN Sharing Setup - Restore Defaults
@@ -60,8 +62,10 @@ if exist "%BACKUPDIR%\LanmanWorkstation_Parameters.reg" (
     reg import "%BACKUPDIR%\LanmanWorkstation_Parameters.reg" >nul 2>&1
     if %errorLevel% equ 0 (
         echo   [OK] LanmanWorkstation Parameters restored
+        echo  [%date% %time%] LanmanWorkstation restored >> "%LOGFILE%"
     ) else (
         echo   [WARN] LanmanWorkstation restore failed
+        echo  [%date% %time%] LanmanWorkstation restore FAILED >> "%LOGFILE%"
     )
 ) else (
     echo   [SKIP] LanmanWorkstation backup not found
@@ -71,8 +75,10 @@ if exist "%BACKUPDIR%\Lsa.reg" (
     reg import "%BACKUPDIR%\Lsa.reg" >nul 2>&1
     if %errorLevel% equ 0 (
         echo   [OK] LSA settings restored
+        echo  [%date% %time%] LSA restored >> "%LOGFILE%"
     ) else (
         echo   [WARN] LSA restore failed
+        echo  [%date% %time%] LSA restore FAILED >> "%LOGFILE%"
     )
 ) else (
     echo   [SKIP] LSA backup not found
@@ -82,8 +88,10 @@ if exist "%BACKUPDIR%\LanmanServer_Parameters.reg" (
     reg import "%BACKUPDIR%\LanmanServer_Parameters.reg" >nul 2>&1
     if %errorLevel% equ 0 (
         echo   [OK] LanmanServer Parameters restored
+        echo  [%date% %time%] LanmanServer restored >> "%LOGFILE%"
     ) else (
         echo   [WARN] LanmanServer restore failed
+        echo  [%date% %time%] LanmanServer restore FAILED >> "%LOGFILE%"
     )
 ) else (
     echo   [SKIP] LanmanServer backup not found
@@ -132,6 +140,7 @@ echo  ====================================================
 echo.
 echo  A reboot is recommended to apply all changes.
 echo  Run verify.bat after reboot to confirm settings.
+echo  Log saved to: %LOGFILE%
 echo.
 echo  ====================================================
 echo.
