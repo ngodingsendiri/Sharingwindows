@@ -4,10 +4,11 @@ color 0A
 
 set "PASS=0"
 set "FAIL=0"
+set "VERSION=1.0.0"
 
 echo.
 echo  ====================================================
-echo   Windows LAN Sharing Setup - Post-Install Verification
+echo   Windows LAN Sharing Setup v%VERSION% - Verification
 echo  ====================================================
 echo.
 
@@ -31,23 +32,43 @@ REM ==========================================
 echo  [2/7] Firewall Rules
 echo  ----------------------------------------------------
 
-echo   Network Discovery:
-netsh advfirewall firewall show rule name=all dir=in 2>nul | findstr /i "Network Discovery" | findstr /i "Enabled" >nul 2>&1
+echo   Network Discovery (DNS):
+netsh advfirewall firewall show rule name="Network Discovery (DNS)" dir=in >nul 2>&1
 if %errorLevel% equ 0 (
-    echo     [OK] Enabled
+    echo     [OK] Rule exists
     set /a PASS+=1
 ) else (
-    echo     [FAIL] Not enabled
+    echo     [FAIL] Rule not found
     set /a FAIL+=1
 )
 
-echo   File and Printer Sharing:
-netsh advfirewall firewall show rule name=all dir=in 2>nul | findstr /i "File and Printer Sharing" | findstr /i "Enabled" >nul 2>&1
+echo   Network Discovery (UPnP-In):
+netsh advfirewall firewall show rule name="Network Discovery (UPnP-In)" dir=in >nul 2>&1
 if %errorLevel% equ 0 (
-    echo     [OK] Enabled
+    echo     [OK] Rule exists
     set /a PASS+=1
 ) else (
-    echo     [FAIL] Not enabled
+    echo     [FAIL] Rule not found
+    set /a FAIL+=1
+)
+
+echo   File and Printer Sharing (SMB-In):
+netsh advfirewall firewall show rule name="File and Printer Sharing (SMB-In)" dir=in >nul 2>&1
+if %errorLevel% equ 0 (
+    echo     [OK] Rule exists
+    set /a PASS+=1
+) else (
+    echo     [FAIL] Rule not found
+    set /a FAIL+=1
+)
+
+echo   File and Printer Sharing (RPC-EPMAP):
+netsh advfirewall firewall show rule name="File and Printer Sharing (RPC-EPMAP)" dir=in >nul 2>&1
+if %errorLevel% equ 0 (
+    echo     [OK] Rule exists
+    set /a PASS+=1
+) else (
+    echo     [FAIL] Rule not found
     set /a FAIL+=1
 )
 echo.
@@ -74,14 +95,15 @@ REM  [4] SMBv1 FEATURE
 REM ==========================================
 echo  [4/7] SMBv1 Feature
 echo  ----------------------------------------------------
-for /f "tokens=3 delims=: " %%a in ('dism /online /get-featureinfo /featurename:SMB1Protocol 2^>nul ^| findstr /i "State"') do (
-    if /i "%%a"=="Enabled" (
-        echo   [OK] SMBv1 is Enabled
-        set /a PASS+=1
-    ) else (
-        echo   [INFO] SMBv1 is Disabled
-        set /a PASS+=1
-    )
+set "SMB1_STATE="
+for /f "tokens=3 delims=: " %%a in ('dism /online /get-featureinfo /featurename:SMB1Protocol 2^>nul ^| findstr /i "State"') do set "SMB1_STATE=%%a"
+
+if /i "%SMB1_STATE%"=="Enabled" (
+    echo   [OK] SMBv1 is Enabled
+    set /a PASS+=1
+) else (
+    echo   [INFO] SMBv1 is Disabled
+    set /a PASS+=1
 )
 echo.
 

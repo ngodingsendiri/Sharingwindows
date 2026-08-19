@@ -125,7 +125,7 @@ REM  RESET SERVICES
 REM ==========================================
 echo.
 echo  [*] Resetting services to manual startup...
-for %%s in (fdPHost FDResPub SSDPSRV upnphost) do (
+for %%s in (fdPHost FDResPub SSDPSRV upnphost LanmanServer LanmanWorkstation) do (
     sc config "%%s" start= demand >nul 2>&1
     echo   [OK] %%s set to manual
 )

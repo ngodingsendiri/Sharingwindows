@@ -2,36 +2,72 @@
 title Windows LAN Sharing Setup
 color 0A
 
+set "VERSION=1.1.0"
 set "LOGFILE=%~dp0sharing-setup.log"
 set "BACKUPDIR=%~dp0registry-backup"
 set "ERRORCOUNT=0"
 set "NOREBOOT=0"
+set "QUIET=0"
 
-if /i "%1"=="--no-reboot" set "NOREBOOT=1"
+REM ==========================================
+REM  PARSE ARGUMENTS
+REM ==========================================
+:parse_args
+if "%~1"=="" goto :done_args
+if /i "%~1"=="--no-reboot" set "NOREBOOT=1"
+if /i "%~1"=="--quiet" set "QUIET=1"
+if /i "%~1"=="--help" goto :show_help
+if /i "%~1"=="-h" goto :show_help
+shift
+goto :parse_args
 
+:show_help
+echo  Windows LAN Sharing Setup v%VERSION%
 echo.
-echo  ====================================================
-echo   Windows LAN Sharing Setup - Installer
-echo   Enable file/printer sharing across LAN networks
-echo  ====================================================
+echo  Usage: install.bat [OPTIONS]
 echo.
+echo  Options:
+echo    --no-reboot    Skip automatic reboot
+echo    --quiet        Suppress console output (log only)
+echo    --help, -h     Show this help message
+echo.
+echo  Examples:
+echo    install.bat                     # Normal install with reboot
+echo    install.bat --no-reboot         # Install, reboot manually later
+echo    install.bat --quiet             # Silent install
+echo    install.bat --quiet --no-reboot # Fully silent, no reboot
+echo.
+exit /b 0
+
+:done_args
+
+if %QUIET% equ 0 (
+    echo.
+    echo  ====================================================
+    echo   Windows LAN Sharing Setup v%VERSION%
+    echo   Enable file/printer sharing across LAN networks
+    echo  ====================================================
+    echo.
+)
 
 REM ==========================================
 REM  ADMIN CHECK
 REM ==========================================
 net session >nul 2>&1
 if %errorLevel% neq 0 (
-    echo  [ERROR] This script requires Administrator privileges.
-    echo  Right-click the file and select "Run as administrator"
-    echo.
-    pause
+    if %QUIET% equ 0 (
+        echo  [ERROR] This script requires Administrator privileges.
+        echo  Right-click the file and select "Run as administrator"
+        echo.
+        pause
+    )
     exit /b 1
 )
 
 REM ==========================================
 REM  BACKUP REGISTRY
 REM ==========================================
-echo  [*] Creating registry backup...
+call :log "  [*] Creating registry backup..."
 if not exist "%BACKUPDIR%" mkdir "%BACKUPDIR%"
 
 reg export "HKLM\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters" "%BACKUPDIR%\LanmanWorkstation_Parameters.reg" /y >nul 2>&1
@@ -137,22 +173,28 @@ if %ERRORCOUNT% equ 0 (
 
 call :log "  ===================================================="
 
-echo.
-echo  Installation complete.
-echo  Log saved to: %LOGFILE%
-echo.
+if %QUIET% equ 0 (
+    echo.
+    echo  Installation complete.
+    echo  Log saved to: %LOGFILE%
+    echo.
+)
 
 if %NOREBOOT% equ 1 (
-    echo  Reboot skipped. Please reboot manually when ready.
+    if %QUIET% equ 0 (
+        echo  Reboot skipped. Please reboot manually when ready.
+        echo.
+        pause
+    )
 ) else (
-    echo  The system will reboot in 10 seconds.
-    echo  Press Ctrl+C to cancel the reboot.
-    echo.
+    if %QUIET% equ 0 (
+        echo  The system will reboot in 10 seconds.
+        echo  Press Ctrl+C to cancel the reboot.
+        echo.
+    )
     timeout /t 10
     shutdown /r /t 0 /f
 )
-echo.
-pause
 exit /b
 
 REM ==========================================
@@ -160,7 +202,7 @@ REM  HELPER FUNCTIONS
 REM ==========================================
 
 :log
-echo %~1
+if %QUIET% equ 0 echo %~1
 echo %~1 >> "%LOGFILE%"
 goto :eof
 

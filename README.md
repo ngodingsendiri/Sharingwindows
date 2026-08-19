@@ -74,7 +74,29 @@ install.bat
 
 # Install without reboot (manual reboot required)
 install.bat --no-reboot
+
+# Silent install (no console output, log only)
+install.bat --quiet
+
+# Fully silent, no reboot
+install.bat --quiet --no-reboot
+
+# Show help
+install.bat --help
 ```
+
+### Deployment (GPO / SCCM / Script)
+
+For silent deployment across multiple PCs:
+
+```bash
+install.bat --quiet --no-reboot
+```
+
+This will:
+- Run without any console window
+- Write all output to `sharing-setup.log`
+- Skip automatic reboot (reboot handled by your deployment tool)
 
 ## Requirements
 
@@ -150,3 +172,5 @@ All operations are logged to `sharing-setup.log` in the same directory. The log 
 ## License
 
 MIT License - Feel free to use, modify, and distribute.
+
+See [CHANGELOG.md](CHANGELOG.md) for version history.
